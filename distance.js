@@ -12,7 +12,7 @@
       endLatLong = value.results[0].geometry.location;
       distRaw = Distance.prototype.formulateDistance(startLatLong.lat, startLatLong.lng, endLatLong.lat, endLatLong.lng);
       distInt = Math.round(distRaw);
-      callback(distInt);
+      callback(distInt, endLatLong);
   }
 
   //shamelessly stolen from http://stackoverflow.com/questions/27928/
@@ -37,8 +37,9 @@
   // main API call and handling of array sorting
   Distance.prototype.measureIt = function(locations){
 
-    MainArray = [];
     var stop = locations.length;
+    mainArray = [];
+    var coords;
 
     $.each(locations, function( index, value ){
 
@@ -50,17 +51,23 @@
        $.getJSON(distanceAPI)
       ).then(function(a, b) {  
         if(b == 'success'){
-          Distance.prototype.calcLocationCoords(a, function(data){
+          Distance.prototype.calcLocationCoords(a, function(locationData, coordsObj){
+            //create array of objects (for sorting purposes)
             locObj = {};
-            locObj['dist'] = data;
+            locObj['dist'] = locationData;
             locObj['place'] = value;
-            MainArray.push(locObj);
+            mainArray.push(locObj);
+
+            //create string of lat/long coords
+            coords += coordsObj['lat'] + "," + coordsObj['lng'] + "|";
+
           });
           if(index == (stop - 1)){
-            SortedMainArray = MainArray.sort(function(a, b) {
+            sortedMainArray = mainArray.sort(function(a, b) {
               return a.dist - b.dist;
             })
-            Distance.prototype.printSorted(SortedMainArray);
+            Distance.prototype.printSorted(sortedMainArray);
+            Distance.prototype.printMap(coords);
           }
         }
       });
@@ -78,6 +85,11 @@ Distance.prototype.printSorted = function(values){
      html += '</tr>';
     $('#content').append(html);
  });
+}
+
+
+Distance.prototype.printMap = function(values){
+  $('#map').append('<img src=https://maps.googleapis.com/maps/api/staticmap?center=40.8513741,-73.8746806&size=640x640&format=png&maptype=roadmap&sensor=false&style=element:labels|visibility:off&markers=icon:http://goo.gl/k8cNSj|' + values + ' />');
 }
 
 window.Distance = Distance;
