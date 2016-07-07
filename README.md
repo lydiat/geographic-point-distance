@@ -1,4 +1,4 @@
-# lfl-distance
+# geographic-point-distance
 
 
 Given the following list of places, use JS to produce a script that orders the locations by distance to [redacted].  You may use whatever geocoding service you’d like, but you will probably find most luck using Google Maps' Geocoding API.
